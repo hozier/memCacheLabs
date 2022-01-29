@@ -26,11 +26,11 @@ func ReadKey(w http.ResponseWriter, r *http.Request, p httprouter.Params, rdb *r
 	cacheKey := p.ByName("cacheKey")
 	data, err := rdb.Get(ctx, cacheKey).Result()
 	if err == redis.Nil { // if key does not exist
-		debugResponse("", "", "[KEY NOT FOUND] ", w)
+		debugResponse("[KEY NOT FOUND] ", "", "", "", w)
 	} else if err != nil {
 		panic(err)
 	} else {
-		debugResponse(cacheKey, data, "[GET] ", w) // else key does exist
+		debugResponse("[GET] ", cacheKey, data, "", w) // else key does exist
 	}
 }
 
@@ -44,11 +44,8 @@ func CreateKey(w http.ResponseWriter, r *http.Request, p httprouter.Params, rdb 
 	if err != nil {
 		panic(err)
 	}
-
-	fmt.Fprint(w, "{timeToLive: ")
-	fmt.Fprint(w, timeToLive)
-	fmt.Fprint(w, " }\n")
-	debugResponse(cacheKey, cacheValue, "[PUT] ", w) // else key does exist
+	var ttl = ", timeToLive: " + timeToLive.String()
+	debugResponse("[PUT] ", cacheKey, cacheValue, ttl, w) // else key does exist
 }
 
 func DeleteKey(w http.ResponseWriter, r *http.Request, p httprouter.Params, rdb *redis.Client) {
@@ -57,7 +54,7 @@ func DeleteKey(w http.ResponseWriter, r *http.Request, p httprouter.Params, rdb 
 	if err != nil {
 		panic(err)
 	}
-	debugResponse("", "", "[DELETE] ", w) // else key does exist
+	debugResponse("[DELETE] ", "", "", "", w) // else key does exist
 }
 
 func parseReqKey(r *http.Request) *Payload {
@@ -77,8 +74,8 @@ func parseReqKey(r *http.Request) *Payload {
 	return &payload
 }
 
-func debugResponse(cacheKey string, cacheValue string, note string, w http.ResponseWriter) {
-	endPoint := note + "{response: { " + cacheKey + ": " + cacheValue + " } }"
+func debugResponse(alert string, cacheKey string, cacheValue string, additional string, w http.ResponseWriter) {
+	endPoint := alert + "{response: { " + cacheKey + ": " + cacheValue + additional + " } }"
 	log.Println(endPoint)
 	fmt.Fprintln(w, endPoint)
 }
