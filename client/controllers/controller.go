@@ -1,4 +1,4 @@
-package handler
+package controller
 
 import (
 	"context"
@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	model "labs/redis/models"
 	"net/http"
 	"time"
 
@@ -16,25 +17,39 @@ import (
 var ctx = context.Background()
 var counter = 0
 
-type Payload struct {
-	CacheKey   string `json:"cacheKey"`
-	CacheValue string `json:"cacheValue"`
-	Ttl        int    `json:"ttl"`
+/** @note
+  *   JSON formatter which reads the given incoming JSON Object. Returns an
+  *   instance of the data transfer object (DTO) upon successful deserialization.
+  */
+func parseReqKey(r *http.Request) *model.Payload {
+	/**
+	Parse key from request body
+	*/
+	payload := model.Payload{}
+	defer r.Body.Close()
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		panic(err)
+	}
+	parseErr := json.Unmarshal(body, &payload)
+	if parseErr != nil {
+		panic(parseErr)
+	}
+	return &payload
 }
 
-func ReadKey(w http.ResponseWriter, r *http.Request, p httprouter.Params, rdb *redis.Client) {
-	cacheKey := p.ByName("cacheKey")
-	data, err := rdb.Get(ctx, cacheKey).Result()
+func ReadById(resourceId string, w http.ResponseWriter, rdb *redis.Client) {
+  data, err := rdb.Get(ctx, resourceId).Result()
 	if err == redis.Nil { // if key does not exist
 		debugResponse("[KEY NOT FOUND] ", "", "", "", w)
 	} else if err != nil {
 		panic(err)
 	} else {
-		debugResponse("[GET] ", cacheKey, data, "", w) // else key does exist
+		debugResponse("[GET] ", resourceId, data, "", w) // else key does exist
 	}
 }
 
-func CreateKey(w http.ResponseWriter, r *http.Request, p httprouter.Params, rdb *redis.Client) {
+func CreateById(w http.ResponseWriter, r *http.Request, p httprouter.Params, rdb *redis.Client) {
 	payload := parseReqKey(r)
 	cacheKey := payload.CacheKey
 	cacheValue := payload.CacheValue
@@ -48,30 +63,13 @@ func CreateKey(w http.ResponseWriter, r *http.Request, p httprouter.Params, rdb 
 	debugResponse("[PUT] ", cacheKey, cacheValue, ttl, w) // else key does exist
 }
 
-func DeleteKey(w http.ResponseWriter, r *http.Request, p httprouter.Params, rdb *redis.Client) {
+func DeleteById(w http.ResponseWriter, r *http.Request, p httprouter.Params, rdb *redis.Client) {
 	cacheKey := p.ByName("cacheKey")
 	err := rdb.Del(ctx, cacheKey).Err()
 	if err != nil {
 		panic(err)
 	}
 	debugResponse("[DELETE] ", "", "", "", w) // else key does exist
-}
-
-func parseReqKey(r *http.Request) *Payload {
-	/**
-	Parse key from request body
-	*/
-	payload := Payload{}
-	defer r.Body.Close()
-	body, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		panic(err)
-	}
-	parseErr := json.Unmarshal(body, &payload)
-	if parseErr != nil {
-		panic(parseErr)
-	}
-	return &payload
 }
 
 func debugResponse(alert string, cacheKey string, cacheValue string, additional string, w http.ResponseWriter) {

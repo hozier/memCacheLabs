@@ -2,7 +2,7 @@ package router
 
 import (
 	"fmt"
-	handler "labs/redis/handlers"
+	controller "labs/redis/controllers"
 	"log"
 	"net/http"
 	"os"
@@ -41,15 +41,16 @@ func CacheService(router *httprouter.Router, rdb *redis.Client) {
 	}
 	router.POST(endPointsMap["createUpdateResource"], func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		debugRoute(endPointsMap["createUpdateResource"], r.Method, w)
-		handler.CreateKey(w, r, p, rdb)
+		controller.CreateById(w, r, p, rdb)
 	})
 	router.GET(endPointsMap["getResource"], func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		debugRoute(endPointsMap["getResource"], r.Method, w)
-		handler.ReadKey(w, r, p, rdb)
+		resourceId := p.ByName("cacheKey")
+		controller.ReadById(resourceId, w, rdb)
 	})
 	router.DELETE(endPointsMap["deleteResource"], func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		debugRoute(endPointsMap["deleteResource"], r.Method, w)
-		handler.DeleteKey(w, r, p, rdb)
+		controller.DeleteById(w, r, p, rdb)
 	})
 	router.GET(endPointsMap["root"], func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		debugRoute(endPointsMap["root"], r.Method, w)
