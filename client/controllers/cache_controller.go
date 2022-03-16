@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	model "labs/redis/models"
+	"log"
 	"net/http"
 	"time"
 
@@ -18,9 +18,9 @@ var ctx = context.Background()
 var counter = 0
 
 /** @note
-  *   JSON formatter which reads the given incoming JSON Object. Returns an
-  *   instance of the data transfer object (DTO) upon successful deserialization.
-  */
+ *   JSON formatter which reads the given incoming JSON Object. Returns an
+ *   instance of the data transfer object (DTO) upon successful deserialization.
+ */
 func parseReqKey(r *http.Request) *model.Payload {
 	/**
 	Parse key from request body
@@ -38,14 +38,17 @@ func parseReqKey(r *http.Request) *model.Payload {
 	return &payload
 }
 
-func ReadById(resourceId string, w http.ResponseWriter, rdb *redis.Client) {
-  data, err := rdb.Get(ctx, resourceId).Result()
+func ReadById(resourceId string, r *http.Request, w http.ResponseWriter, rdb *redis.Client) {
+	data, err := rdb.Get(ctx, resourceId).Result()
 	if err == redis.Nil { // if key does not exist
-		debugResponse("[KEY NOT FOUND] ", "", "", "", w)
+		sendResponse(map[string]string{"message": "Key `" + resourceId + "` does not exist."}, w)
 	} else if err != nil {
 		panic(err)
 	} else {
-		debugResponse("[GET] ", resourceId, data, "", w) // else key does exist
+		// else key does exist
+		ttl, _ := rdb.TTL(ctx, resourceId).Result()
+		stringify := ttl.String()
+		sendResponse(map[string]string{"method": r.Method, "key": resourceId, "value": data, "timeToLive": stringify}, w)
 	}
 }
 
@@ -53,14 +56,14 @@ func CreateById(w http.ResponseWriter, r *http.Request, p httprouter.Params, rdb
 	payload := parseReqKey(r)
 	cacheKey := payload.CacheKey
 	cacheValue := payload.CacheValue
-	oneMillisecond := (time.Second / time.Millisecond)
-	timeToLive := (time.Duration(payload.Ttl) * oneMillisecond) // if ttl value is sent in request, the cache value will persist for only x * Ms
+	// if ttl value is sent in request, the cache value will persist for only x * s
+	timeToLive := (time.Duration(payload.Ttl) * time.Second)
 	err := rdb.Set(ctx, cacheKey, cacheValue, timeToLive).Err()
 	if err != nil {
 		panic(err)
 	}
-	var ttl = ", timeToLive: " + timeToLive.String()
-	debugResponse("[PUT] ", cacheKey, cacheValue, ttl, w) // else key does exist
+	// else key does exist
+	sendResponse(map[string]string{"method": r.Method, "key": cacheKey}, w)
 }
 
 func DeleteById(w http.ResponseWriter, r *http.Request, p httprouter.Params, rdb *redis.Client) {
@@ -69,11 +72,24 @@ func DeleteById(w http.ResponseWriter, r *http.Request, p httprouter.Params, rdb
 	if err != nil {
 		panic(err)
 	}
-	debugResponse("[DELETE] ", "", "", "", w) // else key does exist
+	// else key does exist
+	sendResponse(map[string]string{"message": r.Method + "d " + cacheKey}, w)
 }
 
-func debugResponse(alert string, cacheKey string, cacheValue string, additional string, w http.ResponseWriter) {
-	endPoint := alert + "{response: { " + cacheKey + ": " + cacheValue + additional + " } }"
-	log.Println(endPoint)
-	fmt.Fprintln(w, endPoint)
+func sendResponse(opts map[string]string, w http.ResponseWriter) {
+	w.Header().Set("content-type", "application/json")
+	dict := make(model.Document)
+	if log_message, ok := opts["message"]; ok {
+		dict["message"] = log_message
+	} else {
+		dict["resourceLocation"] = "/api/cache/" + opts["key"]
+		if len(opts["value"]) > 0 {
+			dict["data"] = map[string]string{opts["key"]: opts["value"], "timeToLive": opts["timeToLive"]}
+		} else {
+			dict["message"] = opts["method"] + " complete."
+		}
+	}
+	document, _ := json.Marshal(dict)
+	log.Println(string(document))
+	fmt.Fprintln(w, string(document))
 }

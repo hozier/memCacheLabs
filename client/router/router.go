@@ -1,8 +1,9 @@
 package router
 
 import (
-	"fmt"
+	"encoding/json"
 	controller "labs/redis/controllers"
+	model "labs/redis/models"
 	"log"
 	"net/http"
 	"os"
@@ -40,16 +41,16 @@ func CacheService(router *httprouter.Router, rdb *redis.Client) {
 		"createUpdateResource": "/api/cache", "getResource": "/api/cache/:cacheKey", "deleteResource": "/api/cache/:cacheKey", "root": "/",
 	}
 	router.POST(endPointsMap["createUpdateResource"], func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
-		debugRoute(endPointsMap["createUpdateResource"], r.Method, w)
+		debugRoute(r.URL.Path, r.Method, w)
 		controller.CreateById(w, r, p, rdb)
 	})
 	router.GET(endPointsMap["getResource"], func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
-		debugRoute(endPointsMap["getResource"], r.Method, w)
+		debugRoute(r.URL.Path, r.Method, w)
 		resourceId := p.ByName("cacheKey")
-		controller.ReadById(resourceId, w, rdb)
+		controller.ReadById(resourceId, r, w, rdb)
 	})
 	router.DELETE(endPointsMap["deleteResource"], func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
-		debugRoute(endPointsMap["deleteResource"], r.Method, w)
+		debugRoute(r.URL.Path, r.Method, w)
 		controller.DeleteById(w, r, p, rdb)
 	})
 	router.GET(endPointsMap["root"], func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
@@ -57,8 +58,9 @@ func CacheService(router *httprouter.Router, rdb *redis.Client) {
 	})
 }
 
-func debugRoute(ep string, method string, w http.ResponseWriter) {
-	endPoint := "{api: { serviceName: memCacheLabs, endPoint: " + ep + ", method: " + method + ", version: 0.0.1 } }"
-	log.Println(endPoint)
-	fmt.Fprintln(w, endPoint)
+func debugRoute(uri string, method string, w http.ResponseWriter) {
+	dict := make(model.Document)
+	dict["api"] = map[string]string{"serviceName": "memCacheLabs", method: uri, "version": " 0.0.1 "}
+	document, _ := json.Marshal(dict)
+	log.Println(string(document))
 }

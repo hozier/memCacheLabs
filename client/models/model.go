@@ -3,10 +3,12 @@ package model
 //////////// data model ////////////
 
 /** (formatted) data model
-	{ "response": 
-		{ cacheKey: cacheValue(, optional) } 
-	}
+{"data":
+	{cacheKey:cacheValue,"timeToLive":timeToLive}
+	...
+}
 */
+type Document map[string]interface{}
 
 ////// data transfer object (DTO) //
 
