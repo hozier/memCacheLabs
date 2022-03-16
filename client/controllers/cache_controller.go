@@ -15,7 +15,6 @@ import (
 )
 
 var ctx = context.Background()
-var counter = 0
 
 /** @note
  *   JSON formatter which reads the given incoming JSON Object. Returns an
