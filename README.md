@@ -4,7 +4,7 @@ A Golang-based implementation of an in-memory caching library as-a-service; buil
 
 ###### (a) In Development
 
-In development: memCacheLabs acts as the integrative, the plug-and-play caching layer, living between the server's application and database. <br><br>
+The service, memCacheLabs, acts as an integrative, lightweight, plug-and-playable caching layer, living between the server's application and database. <br><br>
 
 ###### (b.1) Directory
 
