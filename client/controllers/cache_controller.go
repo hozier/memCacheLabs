@@ -17,9 +17,10 @@ import (
 var ctx = context.Background()
 
 /** @note
- *   JSON formatter which reads the given incoming JSON Object. Returns an
- *   instance of the data transfer object (DTO) upon successful deserialization.
- */
+		JSON formatter which converts the incoming JSON to the (DTO) / Paylod model type
+	@return
+		instance of the data transfer object (DTO) / Paylod model upon successful deserialization.
+*/
 func parseReqKey(r *http.Request) *model.Payload {
 	/**
 	Parse key from request body

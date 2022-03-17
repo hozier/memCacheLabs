@@ -42,23 +42,23 @@ func CacheService(router *httprouter.Router, rdb *redis.Client) {
 	}
 
 	/** @note
-		Sample JSON representation of Data Transfer Object / Payload model recieved from client,
-		and the server's subsequent response
-	@request
-		POST | PUT /api/cache
-		{
-			"cacheKey": "foo",
-			"cacheValue": "car",
-			"ttl": 83
-		}
-	@response
-		{
-			"link": {
-					"href": "/api/cache/foo",
-					"rel": "self"
-			},
-			"message": "POST complete."
-		}
+			Sample JSON representation of Data Transfer Object / Payload model recieved from client,
+			and the server's subsequent response
+		@request
+			POST | PUT /api/cache
+			{
+				"cacheKey": "foo",
+				"cacheValue": "car",
+				"ttl": 83
+			}
+		@response
+			{
+				"link": {
+						"href": "/api/cache/foo",
+						"rel": "self"
+				},
+				"message": "POST complete."
+			}
 	*/
 	router.POST(endPointsMap["createUpdateResource"], func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		debugRoute(r.URL.Path, r.Method, w)
@@ -66,16 +66,16 @@ func CacheService(router *httprouter.Router, rdb *redis.Client) {
 	})
 
 	/** @note
-		Sample JSON representation of Document data model sent to client, given
-		a request to the desired resource
-	@request
-		GET /api/cache/foo
-	@response
-		{
-			"data": { "foo": "car",, "timeToLive": "1m17s" },
-			"link": { "href": "/api/cache/foo", "rel": "self" }
-			...
-		}
+			Sample JSON representation of Document data model sent to client, given
+			a request to the desired resource
+		@request
+			GET /api/cache/foo
+		@response
+			{
+				"data": { "foo": "car",, "timeToLive": "1m17s" },
+				"link": { "href": "/api/cache/foo", "rel": "self" }
+				...
+			}
 	*/
 	router.GET(endPointsMap["getResource"], func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		debugRoute(r.URL.Path, r.Method, w)
@@ -86,13 +86,13 @@ func CacheService(router *httprouter.Router, rdb *redis.Client) {
 	/** @note
 		Sample JSON representation of Document data model sent to client, given
 		a request to the desired resource
-	@request
-		DELETE /api/cache/foo
-	@response
-		{
-			"message": "DELETEd foo."
-			...
-		}
+		@request
+			DELETE /api/cache/foo
+		@response
+			{
+				"message": "DELETEd foo."
+				...
+			}
 	*/
 	router.DELETE(endPointsMap["deleteResource"], func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		debugRoute(r.URL.Path, r.Method, w)
