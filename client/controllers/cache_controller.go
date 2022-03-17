@@ -78,24 +78,7 @@ func DeleteById(w http.ResponseWriter, r *http.Request, p httprouter.Params, rdb
 
 func sendResponse(opts map[string]string, w http.ResponseWriter) {
 	w.Header().Set("content-type", "application/json")
-	dict := make(model.Document)
-	if log_message, ok := opts["message"]; ok {
-		dict["message"] = log_message
-	} else {
-		if opts["method"] != "DELETE" {
-			dict["link"] = map[string]string{
-				"rel":  "self",
-				"href": "/api/cache/" + opts["key"]}
-		}
-		if opts["method"] == "GET" {
-			dict["data"] = map[string]interface{}{
-				opts["key"]:  opts["value"],
-				"timeToLive": opts["timeToLive"]}
-		} else {
-			dict["message"] = opts["method"] + " complete."
-		}
-	}
-	document, _ := json.Marshal(dict)
+	document, _ := json.Marshal(model.ComposeDocument((opts)))
 	log.Println(string(document))
 	fmt.Fprintln(w, string(document))
 }
