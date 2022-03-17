@@ -15,6 +15,7 @@ import (
 )
 
 var ctx = context.Background()
+var counter = 0
 
 /** @note
  *   JSON formatter which reads the given incoming JSON Object. Returns an
@@ -81,9 +82,13 @@ func sendResponse(opts map[string]string, w http.ResponseWriter) {
 	if log_message, ok := opts["message"]; ok {
 		dict["message"] = log_message
 	} else {
-		dict["resourceLocation"] = "/api/cache/" + opts["key"]
-		if len(opts["value"]) > 0 {
-			dict["data"] = map[string]string{opts["key"]: opts["value"], "timeToLive": opts["timeToLive"]}
+		if opts["method"] != "DELETE" {
+			dict["data"] = map[string]interface{}{
+				opts["key"]:  opts["value"],
+				"timeToLive": opts["timeToLive"],
+				"link": map[string]string{
+					"rel":  "self",
+					"href": "/api/cache/" + opts["key"]}}
 		} else {
 			dict["message"] = opts["method"] + " complete."
 		}
