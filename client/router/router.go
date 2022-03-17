@@ -60,7 +60,7 @@ func CacheService(router *httprouter.Router, rdb *redis.Client) {
 
 func debugRoute(uri string, method string, w http.ResponseWriter) {
 	dict := make(model.Document)
-	dict["api"] = map[string]string{"serviceName": "memCacheLabs", method: uri, "version": " 0.0.1 "}
+	dict["api"] = map[string]string{"serviceName": "memCacheLabs", method: uri, "version": " 0.0.1"}
 	document, _ := json.Marshal(dict)
 	log.Println(string(document))
 }
