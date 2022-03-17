@@ -2,12 +2,6 @@ package model
 
 //////////// data model ////////////
 
-/** (formatted) data model
-{"data":
-	{cacheKey:cacheValue,"timeToLive":timeToLive}
-	...
-}
-*/
 type Document map[string]interface{}
 
 ////// data transfer object (DTO) //
