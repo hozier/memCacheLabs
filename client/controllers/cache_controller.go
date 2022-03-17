@@ -37,18 +37,6 @@ func parseReqKey(r *http.Request) *model.Payload {
 	return &payload
 }
 
-/** @note
-			Sample JSON representation of Document data model sent to client, given 
-			a request to the desired resource
-		@request
-			GET /api/cache/foo
-		@response
-			{
-				"data": { "foo": "car",, "timeToLive": "1m17s" },
-				"link": { "href": "/api/cache/foo", "rel": "self" }
-				...
-			}
-*/
 func ReadById(resourceId string, r *http.Request, w http.ResponseWriter, rdb *redis.Client) {
 	data, err := rdb.Get(ctx, resourceId).Result()
 	if err == redis.Nil { // if key does not exist
@@ -63,25 +51,6 @@ func ReadById(resourceId string, r *http.Request, w http.ResponseWriter, rdb *re
 	}
 }
 
-/** @note
-			Sample JSON representation of Data Transfer Object / Payload model recieved from client,
-			and the server's subsequent response
-		@request
-			POST | PUT /api/cache
-			{
-				"cacheKey": "foo", 
-				"cacheValue": "car",
-				"ttl": 83
-			}
-		@response
-			{
-				"link": {
-						"href": "/api/cache/foo",
-						"rel": "self"
-				},
-				"message": "POST complete."
-			}
-*/
 func CreateById(w http.ResponseWriter, r *http.Request, p httprouter.Params, rdb *redis.Client) {
 	payload := parseReqKey(r)
 	cacheKey := payload.CacheKey
