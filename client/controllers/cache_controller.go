@@ -83,12 +83,14 @@ func sendResponse(opts map[string]string, w http.ResponseWriter) {
 		dict["message"] = log_message
 	} else {
 		if opts["method"] != "DELETE" {
+			dict["link"] = map[string]string{
+				"rel":  "self",
+				"href": "/api/cache/" + opts["key"]}
+		}
+		if opts["method"] == "GET" {
 			dict["data"] = map[string]interface{}{
 				opts["key"]:  opts["value"],
-				"timeToLive": opts["timeToLive"],
-				"link": map[string]string{
-					"rel":  "self",
-					"href": "/api/cache/" + opts["key"]}}
+				"timeToLive": opts["timeToLive"]}
 		} else {
 			dict["message"] = opts["method"] + " complete."
 		}
