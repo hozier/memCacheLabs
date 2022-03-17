@@ -26,8 +26,8 @@ Navigate to ./client,
 `├── client` <br>
 
 1. If no prior runs, proceed to pull in application dependecies by running `go get`. If dependencies already installed, proceed to step 2.
-2. To build, `go build main.go`
-3. To run, `go run main.go` <br><br>
+2. To build, run `go build main.go`.
+3. To start the service, run `go run main.go`.<br><br>
 
 ###### (c) API Documentation
 
