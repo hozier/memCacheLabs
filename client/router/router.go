@@ -31,11 +31,6 @@ func NewRouter() *httprouter.Router {
 	return r
 }
 
-/*
- HTTP method GET services all require param in the form /:cacheKey
- HTTP method POST services all require payload in the form { "cacheKey": "foo", "cacheValue": "bar" }
- HTTP method DELETE services all require param in the form /:cacheKey
-*/
 func CacheService(router *httprouter.Router, rdb *redis.Client) {
 	endPointsMap := map[string]string{
 		"createUpdateResource": "/api/cache", "getResource": "/api/cache/:cacheKey", "deleteResource": "/api/cache/:cacheKey", "root": "/",
